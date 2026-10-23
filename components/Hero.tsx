@@ -34,11 +34,12 @@ export default function Hero({ ready }: { ready: boolean }) {
         }, [], 0.7)
         .to(q('.hero-fade'), { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.09 }, 0.7);
 
-      // Camera pull as you leave the hero: the name tears apart and blurs out.
+      // Camera pull as you leave the hero: the name tears apart and fades out.
+      // (No blur here: re-filtering text this large on every scroll frame was the main source of scroll jank.)
       gsap
         .timeline({ scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } })
-        .to(q('.hero-line-1'), { xPercent: -22, opacity: 0.05, filter: 'blur(8px)', ease: 'none' }, 0)
-        .to(q('.hero-line-2'), { xPercent: 22, opacity: 0.05, filter: 'blur(8px)', ease: 'none' }, 0)
+        .to(q('.hero-line-1'), { xPercent: -22, opacity: 0, ease: 'none' }, 0)
+        .to(q('.hero-line-2'), { xPercent: 22, opacity: 0, ease: 'none' }, 0)
         .to(q('.hero-bg'), { scale: 1.35, opacity: 0.25, ease: 'none' }, 0)
         .to(q('.hero-top, .hero-bottom'), { y: -100, opacity: 0, ease: 'none' }, 0);
 

@@ -27,7 +27,7 @@ export default function Home() {
       <Loader onComplete={onReady} />
       <Cursor />
       <Grain />
-      <Nav />
+      <Nav ready={ready} />
       <ChargeMeter />
       <main>
         <Hero ready={ready} />

@@ -313,9 +313,10 @@ html.has-cursor .cursor-ring {
 }
 
 /* ---------- Grain ---------- */
+/* Only needs to cover the ±3% jitter; the old -50% inset made a layer four times the screen. */
 .grain {
   position: fixed;
-  inset: -50%;
+  inset: -5%;
   z-index: 150;
   pointer-events: none;
   opacity: 0.07;
@@ -328,6 +329,11 @@ html.has-cursor .cursor-ring {
   50% { transform: translate(2%, -3%); }
   75% { transform: translate(-2%, -1%); }
   100% { transform: translate(1%, 3%); }
+}
+@media (max-width: 760px) {
+  .grain {
+    display: none;
+  }
 }
 
 /* ---------- Nav ---------- */
@@ -366,6 +372,13 @@ html.has-cursor .cursor-ring {
 .nav.nav-solid::before {
   opacity: 1;
 }
+@media (max-width: 900px) {
+  .nav::before {
+    background: rgba(2, 4, 10, 0.92);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
 .nav.nav-hidden {
   transform: translateY(-110%);
 }
@@ -393,6 +406,25 @@ html.has-cursor .cursor-ring {
 }
 .nav-mark .nav-bolt {
   fill: #fff;
+  transition: fill 0.3s;
+}
+.nav-mark svg {
+  transition: transform 0.6s var(--ease);
+}
+.nav-mark span {
+  transition: color 0.3s, letter-spacing 0.5s var(--ease);
+}
+@media (hover: hover) {
+  .nav-mark:hover svg {
+    transform: rotate(-10deg) scale(1.12);
+  }
+  .nav-mark:hover .nav-bolt {
+    fill: var(--amp);
+  }
+  .nav-mark:hover span {
+    color: var(--amp);
+    letter-spacing: 0.02em;
+  }
 }
 .nav-clock {
   font-family: var(--mono);
@@ -422,22 +454,119 @@ html.has-cursor .cursor-ring {
   text-decoration: none;
   color: #fff;
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 2px;
+  transition: color 0.3s, background 0.4s var(--ease), border-color 0.3s;
 }
+/* Slides in under the label on hover; stays scaled to zero otherwise. */
 .nav nav a::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -4px;
-  height: 1px;
-  background: currentColor;
+  left: 2px;
+  right: 2px;
+  bottom: 3px;
+  height: 1.5px;
+  background: var(--amp);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.5s var(--ease);
 }
-.nav nav a:hover::after {
+.nav-roll {
+  display: block;
+  height: 1.3em;
+  line-height: 1.3;
+  overflow: hidden;
+}
+.nav-roll > span {
+  display: block;
+  transition: transform 0.5s var(--ease);
+}
+.nav-roll > span:last-child {
+  color: var(--amp);
+}
+@media (hover: hover) {
+  .nav nav a:hover .nav-roll > span {
+    transform: translateY(-100%);
+  }
+  .nav nav a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+.nav nav a:active .nav-roll > span {
+  transform: translateY(-100%);
+}
+.nav nav a:focus-visible::after {
   transform: scaleX(1);
-  transform-origin: left;
+}
+
+/* Contact is the primary action: an outlined pill that floods amber from below on hover. */
+.nav nav .nav-cta {
+  padding: 8px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.nav nav .nav-cta::after {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: auto;
+  background: var(--amp);
+  transform: translateY(101%);
+  transform-origin: center;
+  z-index: -1;
+  transition: transform 0.55s var(--ease);
+}
+/* The pill doesn't roll its label: the text only darkens once the amber fill has mostly covered it, so it never sits dark-on-dark. */
+.nav nav .nav-cta .nav-roll > span:last-child {
+  display: none;
+}
+.nav nav .nav-cta .nav-roll > span:first-child {
+  transform: none !important;
+  transition: color 0.2s;
+}
+@media (hover: hover) {
+  .nav nav .nav-cta:hover {
+    border-color: var(--amp);
+  }
+  .nav nav .nav-cta:hover::after {
+    transform: translateY(0);
+  }
+  .nav nav .nav-cta:hover .nav-roll > span:first-child {
+    color: var(--bg);
+    transition: color 0.2s 0.18s;
+  }
+}
+.nav nav .nav-cta:active,
+.nav nav .nav-cta:focus-visible {
+  border-color: var(--amp);
+}
+.nav nav .nav-cta:active::after,
+.nav nav .nav-cta:focus-visible::after {
+  transform: translateY(0);
+}
+.nav nav .nav-cta:active .nav-roll > span:first-child,
+.nav nav .nav-cta:focus-visible .nav-roll > span:first-child {
+  color: var(--bg);
+}
+
+/* Entrance: links drop in one after another once the loader has opened. */
+.nav:not(.nav-ready) nav a {
+  opacity: 0;
+}
+.nav.nav-ready nav a {
+  animation: nav-in 0.9s var(--ease) both;
+  animation-delay: calc(var(--i) * 80ms + 350ms);
+}
+@keyframes nav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
 }
 @media (max-width: 900px) {
   .nav-clock {
@@ -457,13 +586,32 @@ html.has-cursor .cursor-ring {
   align-content: center;
   gap: 5px;
   cursor: pointer;
+  transition: border-color 0.3s, color 0.3s, background 0.3s, transform 0.4s var(--ease);
 }
 .nav-toggle span {
   display: block;
   width: 16px;
   height: 1.5px;
   background: currentColor;
-  transition: transform 0.4s var(--ease);
+  transition: transform 0.4s var(--ease), width 0.4s var(--ease);
+}
+.nav-toggle:active {
+  transform: scale(0.9);
+  border-color: var(--amp);
+  color: var(--amp);
+}
+@media (hover: hover) {
+  .nav-toggle:hover {
+    border-color: var(--amp);
+    color: var(--amp);
+    background: rgba(255, 176, 32, 0.1);
+  }
+  .nav-toggle:hover span:last-child {
+    width: 10px;
+  }
+  .nav-open .nav-toggle:hover span:last-child {
+    width: 16px;
+  }
 }
 .nav-open .nav-toggle span:first-child {
   transform: translateY(3.25px) rotate(45deg);
@@ -496,11 +644,47 @@ html.has-cursor .cursor-ring {
     opacity: 1;
     visibility: visible;
   }
-  .nav nav a {
+  /* Full-screen menu: big plain words that stagger up when it opens, no roll or pill. */
+  .nav nav a,
+  .nav nav .nav-cta {
     align-self: flex-start;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .nav nav a::after,
+  .nav nav .nav-cta::after {
+    display: none;
+  }
+  .nav-roll {
+    height: auto;
+    overflow: visible;
+  }
+  .nav-roll > span:last-child {
+    display: none;
+  }
+  .nav:not(.nav-ready) nav a {
+    opacity: 1;
+  }
+  .nav.nav-ready nav a {
+    animation: none;
+  }
+  .nav.nav-open nav a {
+    animation: menu-in 0.8s var(--ease) both;
+    animation-delay: calc(var(--i) * 70ms + 120ms);
+  }
+  .nav nav a:active {
+    color: var(--amp);
   }
   .nav nav .nav-cta {
     color: var(--amp);
+  }
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
   }
 }
 
@@ -565,10 +749,9 @@ html.has-cursor .cursor-ring {
     transform: none;
     flex-direction: row;
     padding: 6px 10px;
-    background: rgba(2, 4, 10, 0.75);
+    background: rgba(2, 4, 10, 0.92);
     border: 1px solid var(--line);
     border-radius: 6px;
-    backdrop-filter: blur(8px);
   }
   .cm-cap,
   .cm-v {
@@ -579,6 +762,7 @@ html.has-cursor .cursor-ring {
     height: 14px;
     flex-direction: row;
     padding: 2px;
+    backdrop-filter: none;
   }
 }
 
@@ -606,15 +790,21 @@ html.has-cursor .cursor-ring {
   stroke: rgba(61, 245, 255, 0.09);
   stroke-width: 1.5;
 }
+/* No drop-shadow glow: a filter on 38 constantly repainting paths cost more than everything else on the page combined. */
 .trace-pulse {
   fill: none;
   stroke: var(--volt);
-  stroke-width: 2;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-dasharray: 70 930;
   stroke-dashoffset: 1000;
-  filter: drop-shadow(0 0 4px var(--volt));
   animation: pulse linear infinite;
+}
+/* Any running pulse repaints the whole SVG each frame; phones can't afford it, so they get the static board only. */
+@media (max-width: 760px) {
+  .trace-pulse {
+    display: none;
+  }
 }
 @keyframes pulse {
   to { stroke-dashoffset: 0; }
@@ -673,7 +863,7 @@ html.has-cursor .cursor-ring {
 }
 .hero-line {
   display: block;
-  will-change: transform, filter;
+  will-change: transform;
 }
 .hero-line-2 {
   padding-left: 14vw;
@@ -1539,30 +1729,51 @@ html.has-cursor .cursor-ring {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(24px, 3vw, 48px);
 }
+.sk-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-2);
+}
+.sk-idx,
+.sk-count {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--volt);
+}
+.sk-count {
+  margin-left: auto;
+  color: var(--muted);
+}
 .sk-group h3 {
   font-size: 1.15rem;
   font-variation-settings: 'wdth' 110;
-  margin-bottom: 1em;
-  padding-bottom: 0.8em;
-  border-bottom: 1px solid var(--line-2);
 }
 .sk-group ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 .sk-chip {
   font-size: 0.88rem;
-  padding: 5px 11px;
+  line-height: 1.3;
+  padding: 7px 12px;
   border: 1px solid var(--line-2);
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--panel);
-  transition: border-color 0.3s, color 0.3s, transform 0.3s var(--ease);
+  /* GSAP owns every transform property on this element after the reveal (it writes `translate: none` inline), so the hover lift uses `top`. */
+  position: relative;
+  top: 0;
+  transition: border-color 0.3s, color 0.3s, top 0.3s var(--ease);
 }
-.sk-chip:hover {
-  border-color: var(--amp);
-  color: var(--amp);
-  transform: translateY(-3px);
+@media (hover: hover) {
+  .sk-chip:hover {
+    border-color: var(--amp);
+    color: var(--amp);
+    top: -3px;
+  }
 }
 @media (max-width: 1000px) {
   .sk-grid {
@@ -1572,6 +1783,7 @@ html.has-cursor .cursor-ring {
 @media (max-width: 560px) {
   .sk-grid {
     grid-template-columns: 1fr;
+    gap: 44px;
   }
 }
 

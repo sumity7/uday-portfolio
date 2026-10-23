@@ -34,12 +34,13 @@ export default function SparkField({ tone = 'volt', count = 180 }: { tone?: Tone
     let flash = 0;
     let particles: Particle[] = [];
     const bolts: Bolt[] = [];
+    const hotOnes: (Particle | number)[] = [];
     const mouse = { x: -9999, y: -9999, active: false };
 
     const spawn = (): Particle => ({ x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0, life: 200 + Math.random() * 500, hot: 0 });
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, canvas.clientWidth < 700 ? 1.5 : 2);
       W = canvas.clientWidth;
       H = canvas.clientHeight;
       canvas.width = Math.max(1, W * dpr);
@@ -112,6 +113,10 @@ export default function SparkField({ tone = 'volt', count = 180 }: { tone?: Tone
       ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = 'lighter';
 
+      // Cool particles share one style, so they go out as a single path; only the few hot ones are stroked individually.
+      ctx.strokeStyle = rgba(base, 0.32);
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
       for (const p of particles) {
         const a = field(p.x, p.y);
         p.vx += Math.cos(a) * 0.12;
@@ -139,14 +144,26 @@ export default function SparkField({ tone = 'volt', count = 180 }: { tone?: Tone
           Object.assign(p, spawn());
           continue;
         }
+        if (p.hot < 0.05) {
+          ctx.moveTo(ox, oy);
+          ctx.lineTo(p.x, p.y);
+          continue;
+        }
+        hotOnes.push(p, ox, oy);
+      }
+      ctx.stroke();
+
+      for (let i = 0; i < hotOnes.length; i += 3) {
+        const p = hotOnes[i] as Particle;
         const c = p.hot > 0.3 ? hot : base;
         ctx.strokeStyle = rgba(c, 0.32 + p.hot * 0.6);
         ctx.lineWidth = 1.1 + p.hot * 1.4;
         ctx.beginPath();
-        ctx.moveTo(ox, oy);
+        ctx.moveTo(hotOnes[i + 1] as number, hotOnes[i + 2] as number);
         ctx.lineTo(p.x, p.y);
         ctx.stroke();
       }
+      hotOnes.length = 0;
 
       if (!reduce && Math.random() < 0.007 && particles.length > 2) {
         const a = particles[(Math.random() * particles.length) | 0];

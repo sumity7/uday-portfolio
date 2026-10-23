@@ -1,9 +1,16 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ScrollTrigger, useGSAP } from '@/lib/gsap';
 
-export default function Nav() {
+const LINKS = [
+  { href: '#about', label: 'About' },
+  { href: '#work', label: 'Career' },
+  { href: '#skills', label: 'Skills' },
+  { href: '#contact', label: 'Contact', cta: true },
+];
+
+export default function Nav({ ready = true }: { ready?: boolean }) {
   const ref = useRef<HTMLElement>(null);
   const [time, setTime] = useState('--:--');
   const [open, setOpen] = useState(false);
@@ -38,7 +45,7 @@ export default function Nav() {
   });
 
   return (
-    <header className={`nav${open ? ' nav-open' : ''}`} ref={ref}>
+    <header className={`nav${open ? ' nav-open' : ''}${ready ? ' nav-ready' : ''}`} ref={ref}>
       <a href="#top" className="nav-mark" data-cursor="Top" onClick={() => setOpen(false)}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="2.5" y="6" width="17" height="12" rx="2" />
@@ -62,10 +69,15 @@ export default function Nav() {
         <span />
       </button>
       <nav id="nav-links" aria-label="Sections" onClick={(e) => (e.target as HTMLElement).closest('a') && setOpen(false)}>
-        <a href="#about">About</a>
-        <a href="#work">Career</a>
-        <a href="#skills">Skills</a>
-        <a href="#contact" className="nav-cta">Contact</a>
+        {LINKS.map((l, i) => (
+          <a key={l.href} href={l.href} className={l.cta ? 'nav-cta' : undefined} style={{ '--i': i } as CSSProperties}>
+            {/* Two stacked copies of the label: on hover the pair slides up so the second one rolls in. */}
+            <span className="nav-roll">
+              <span>{l.label}</span>
+              <span aria-hidden="true">{l.label}</span>
+            </span>
+          </a>
+        ))}
       </nav>
     </header>
   );

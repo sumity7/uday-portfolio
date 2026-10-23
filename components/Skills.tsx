@@ -28,18 +28,12 @@ export default function Skills() {
       const reset = () => skew(0);
       ScrollTrigger.addEventListener('scrollEnd', reset);
 
+      // One timeline per group, played once: a refresh (address bar showing/hiding on phones) must not rewind a finished reveal.
       q('.sk-group').forEach((g) => {
-        gsap.from(g.querySelectorAll('.sk-chip'), {
-          y: 40,
-          opacity: 0,
-          rotate: () => gsap.utils.random(-12, 12),
-          scale: 0.7,
-          stagger: 0.035,
-          duration: 0.8,
-          ease: 'back.out(1.8)',
-          scrollTrigger: { trigger: g, start: 'top 85%' },
-        });
-        gsap.from(g.querySelector('h3'), { x: -40, opacity: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: g, start: 'top 85%' } });
+        gsap
+          .timeline({ scrollTrigger: { trigger: g, start: 'top 90%', once: true } })
+          .from(g.querySelector('.sk-head'), { y: 16, opacity: 0, duration: 0.7, ease: 'power3.out' })
+          .from(g.querySelectorAll('.sk-chip'), { y: 18, opacity: 0, stagger: 0.04, duration: 0.6, ease: 'power3.out' }, 0.15);
       });
 
       return () => ScrollTrigger.removeEventListener('scrollEnd', reset);
@@ -65,9 +59,13 @@ export default function Skills() {
       </div>
 
       <div className="wrap sk-grid">
-        {skillGroups.map((g) => (
+        {skillGroups.map((g, gi) => (
           <div className="sk-group" key={g.title}>
-            <h3>{g.title}</h3>
+            <div className="sk-head">
+              <span className="sk-idx">{String(gi + 1).padStart(2, '0')}</span>
+              <h3>{g.title}</h3>
+              <span className="sk-count">{g.items.length}</span>
+            </div>
             <ul>
               {g.items.map((it) => (
                 <li className="sk-chip" key={it}>
