@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+.env*.local
+*.tsbuildinfo
+.DS_Store
+
+# stray files from a misconfigured Claude notify hook
+C*Userssyada.claude*

@@ -1,0 +1,49 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { ScrollTrigger, useGSAP } from '@/lib/gsap';
+
+export default function Nav() {
+  const ref = useRef<HTMLElement>(null);
+  const [time, setTime] = useState('--:--');
+
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+    const tick = () => setTime(fmt.format(new Date()));
+    tick();
+    const id = window.setInterval(tick, 15000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useGSAP(() => {
+    ScrollTrigger.create({
+      start: 0,
+      end: 'max',
+      onUpdate: (self) => {
+        ref.current?.classList.toggle('nav-hidden', self.direction === 1 && self.scroll() > 240);
+      },
+    });
+  });
+
+  return (
+    <header className="nav" ref={ref}>
+      <a href="#top" className="nav-mark" data-cursor="Top">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2.5" y="6" width="17" height="12" rx="2" />
+          <rect x="19.5" y="10" width="2.5" height="4" rx="0.6" className="nav-tip" />
+          <path d="M12.5 7.5 9 12.6h3l-1.2 4 3.7-5.3h-3l1-3.8Z" className="nav-bolt" />
+        </svg>
+        <span>Udayraj Yadav</span>
+      </a>
+      <span className="nav-clock">
+        <i /> Ahmedabad {time} IST
+      </span>
+      <nav aria-label="Sections">
+        <a href="#about">About</a>
+        <a href="#work">Career</a>
+        <a href="#skills">Skills</a>
+        <a href="#contact" className="nav-cta">Contact</a>
+      </nav>
+    </header>
+  );
+}
