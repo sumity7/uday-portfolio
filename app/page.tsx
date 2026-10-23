@@ -7,6 +7,7 @@ import Cursor from '@/components/Cursor';
 import Grain from '@/components/Grain';
 import Nav from '@/components/Nav';
 import ChargeMeter from '@/components/ChargeMeter';
+import Assistant from '@/components/Assistant';
 import Hero from '@/components/Hero';
 import PackAssembly from '@/components/PackAssembly';
 import About from '@/components/About';
@@ -29,6 +30,7 @@ export default function Home() {
       <Grain />
       <Nav ready={ready} />
       <ChargeMeter />
+      <Assistant ready={ready} />
       <main>
         <Hero ready={ready} />
         <PackAssembly />

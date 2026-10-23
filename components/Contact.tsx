@@ -41,7 +41,7 @@ export default function Contact() {
   );
 
   return (
-    <section className="contact" id="contact" ref={root} data-cursor="Click to discharge">
+    <section className="contact" id="contact" ref={root}>
       <div className="ct-bg">
         <SparkField tone="amp" count={130} />
       </div>

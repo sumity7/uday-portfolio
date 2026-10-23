@@ -49,7 +49,7 @@ export default function Hero({ ready }: { ready: boolean }) {
   );
 
   return (
-    <section className="hero" id="top" ref={root} data-cursor="Click to discharge">
+    <section className="hero" id="top" ref={root}>
       <div className="hero-bg">
         <CircuitTraces />
         <SparkField />

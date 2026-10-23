@@ -2,7 +2,7 @@
 
 import { useRef, type PointerEvent } from 'react';
 import { gsap, useGSAP } from '@/lib/gsap';
-import { certs } from '@/lib/data';
+import { certs, education, languages } from '@/lib/data';
 import RevealHeading from './RevealHeading';
 
 export default function Certifications() {
@@ -66,12 +66,14 @@ export default function Certifications() {
         </div>
         <div className="ce-edu">
           <div>
-            <h3>B.Tech (Hons), Electronics &amp; Communication Engineering</h3>
-            <p>IES College of Technology, Bhopal, 2018 to 2022</p>
+            <h3>{education.degree}</h3>
+            <p>
+              {education.school}, {education.years}
+            </p>
           </div>
           <div>
             <h3>Languages</h3>
-            <p>English and Hindi, full professional proficiency</p>
+            <p>{languages}</p>
           </div>
         </div>
       </div>

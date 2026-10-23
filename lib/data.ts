@@ -102,3 +102,20 @@ export const certs = [
   { title: 'BESS Installation & Commissioning', note: 'Inverter, PCS and EMS integration', code: 'C-03' },
   { title: 'Advanced Battery Management Systems', note: 'SOC/SOH, protection, cell balancing, safety diagnostics', code: 'C-04' },
 ];
+
+export const education = {
+  degree: 'B.Tech (Hons), Electronics & Communication Engineering',
+  school: 'IES College of Technology, Bhopal',
+  years: '2018 to 2022',
+};
+
+export const languages = 'English and Hindi, full professional proficiency';
+
+/** Suggestions the chat assistant offers before the first message. */
+export const starterQuestions = [
+  'What does Udayraj do?',
+  'Tell me about his BESS projects',
+  'What are his key skills?',
+  'Walk me through his career',
+  'How can I contact him?',
+];

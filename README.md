@@ -46,3 +46,13 @@ components/     one file per scene + Cursor, Loader, SmoothScroll, ChargeMeter, 
 lib/            data.ts (content), gsap.ts (plugin registration), scramble.ts, rng.ts
 public/         udayraj.jpg
 ```
+
+## AI assistant
+
+The "Ask me" chat uses Groq through a server route (`app/api/chat/route.ts`), so the key never reaches the browser.
+
+1. Put your key in `.env.local`: `GROQ_API_KEY=...` (see `.env.example`). Restart `npm run dev` after changing it.
+2. Optional: `GROQ_MODEL` to pick another Groq model (default `llama-3.3-70b-versatile`).
+3. On a host such as Vercel, add the same variable in the project settings.
+
+What the assistant knows is generated from `lib/data.ts` by `lib/knowledge.ts`, so editing the data updates its answers too.
