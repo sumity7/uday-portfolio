@@ -30,6 +30,7 @@
 html {
   background: var(--bg);
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
 }
 html.is-locked,
 html.is-locked body {
@@ -276,7 +277,6 @@ html.has-cursor .cursor-ring {
   height: 38px;
   border: 1px solid rgba(61, 245, 255, 0.6);
   border-radius: 50%;
-  display: grid;
   place-items: center;
   transition: width 0.4s var(--ease), height 0.4s var(--ease), background 0.3s, border-color 0.3s;
 }
@@ -344,6 +344,27 @@ html.has-cursor .cursor-ring {
   padding: calc(18px + env(safe-area-inset-top, 0px)) var(--pad) 18px;
   mix-blend-mode: difference;
   transition: transform 0.6s var(--ease);
+}
+/* Backing lives on a pseudo-element: backdrop-filter on .nav itself would trap the fixed mobile menu inside it. */
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(2, 4, 10, 0.78);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+.nav.nav-solid,
+.nav.nav-open {
+  mix-blend-mode: normal;
+}
+.nav.nav-solid::before {
+  opacity: 1;
 }
 .nav.nav-hidden {
   transform: translateY(-110%);
@@ -423,9 +444,63 @@ html.has-cursor .cursor-ring {
     display: none;
   }
 }
+.nav-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.nav-toggle span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 0.4s var(--ease);
+}
+.nav-open .nav-toggle span:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+.nav-open .nav-toggle span:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
 @media (max-width: 620px) {
-  .nav nav a:not(.nav-cta) {
-    display: none;
+  .nav-toggle {
+    display: grid;
+  }
+  .nav nav {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 var(--pad);
+    background: rgba(2, 4, 10, 0.97);
+    font-size: clamp(2.4rem, 12vw, 3.4rem);
+    font-weight: 800;
+    font-variation-settings: 'wdth' 115;
+    line-height: 1.15;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s var(--ease), visibility 0.4s;
+  }
+  .nav.nav-open nav {
+    opacity: 1;
+    visibility: visible;
+  }
+  .nav nav a {
+    align-self: flex-start;
+  }
+  .nav nav .nav-cta {
+    color: var(--amp);
   }
 }
 
@@ -589,7 +664,8 @@ html.has-cursor .cursor-ring {
   color: var(--muted);
 }
 .hero-name {
-  font-size: clamp(4.2rem, 17.5vw, 19rem);
+  /* "UDAYRAJ" runs ~6.3em wide at this weight/width, so cap it to the padded viewport or the J gets cut. */
+  font-size: min(17.5vw, calc((100vw - 2 * var(--pad)) / 6.5), 19rem);
   font-weight: 900;
   font-variation-settings: 'wdth' 125;
   line-height: 0.8;
@@ -721,6 +797,20 @@ html.has-cursor .cursor-ring {
   }
   .hero-line-2 {
     -webkit-text-stroke-width: 1.2px;
+  }
+}
+/* On tall narrow screens the name is width-capped, so a full-height bottom-anchored hero leaves half the screen empty. */
+@media (max-width: 900px) and (orientation: portrait) {
+  .hero {
+    height: auto;
+    min-height: 0;
+  }
+  .hero-content {
+    padding-top: 290px;
+  }
+  .hero-badge {
+    top: 160px;
+    bottom: auto;
   }
 }
 
@@ -1488,6 +1578,8 @@ html.has-cursor .cursor-ring {
 /* ---------- Certifications ---------- */
 .certs {
   padding: clamp(40px, 8vh, 100px) 0 clamp(110px, 18vh, 200px);
+  /* Cards start tipped back in 3D before their reveal and project wider than the screen. */
+  overflow-x: clip;
 }
 .ce-grid {
   display: grid;
@@ -1668,6 +1760,14 @@ html.has-cursor .cursor-ring {
 }
 .ct-primary small {
   color: rgba(2, 4, 10, 0.7);
+}
+@media (max-width: 560px) {
+  .ct-links {
+    flex-direction: column;
+  }
+  .ct-links .magnetic {
+    display: block;
+  }
 }
 .ct-primary:hover {
   background: var(--volt);

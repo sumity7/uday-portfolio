@@ -6,6 +6,14 @@ import { ScrollTrigger, useGSAP } from '@/lib/gsap';
 export default function Nav() {
   const ref = useRef<HTMLElement>(null);
   const [time, setTime] = useState('--:--');
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
 
   useEffect(() => {
     const fmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
@@ -20,14 +28,18 @@ export default function Nav() {
       start: 0,
       end: 'max',
       onUpdate: (self) => {
-        ref.current?.classList.toggle('nav-hidden', self.direction === 1 && self.scroll() > 240);
+        const el = ref.current;
+        if (!el) return;
+        el.classList.toggle('nav-hidden', self.direction === 1 && self.scroll() > 240 && !el.classList.contains('nav-open'));
+        // Over page content the blended nav washes out, so give it a solid backing once we leave the top.
+        el.classList.toggle('nav-solid', self.scroll() > 40);
       },
     });
   });
 
   return (
-    <header className="nav" ref={ref}>
-      <a href="#top" className="nav-mark" data-cursor="Top">
+    <header className={`nav${open ? ' nav-open' : ''}`} ref={ref}>
+      <a href="#top" className="nav-mark" data-cursor="Top" onClick={() => setOpen(false)}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="2.5" y="6" width="17" height="12" rx="2" />
           <rect x="19.5" y="10" width="2.5" height="4" rx="0.6" className="nav-tip" />
@@ -38,7 +50,18 @@ export default function Nav() {
       <span className="nav-clock">
         <i /> Ahmedabad {time} IST
       </span>
-      <nav aria-label="Sections">
+      <button
+        type="button"
+        className="nav-toggle"
+        aria-expanded={open}
+        aria-controls="nav-links"
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span />
+        <span />
+      </button>
+      <nav id="nav-links" aria-label="Sections" onClick={(e) => (e.target as HTMLElement).closest('a') && setOpen(false)}>
         <a href="#about">About</a>
         <a href="#work">Career</a>
         <a href="#skills">Skills</a>
