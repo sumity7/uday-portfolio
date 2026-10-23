@@ -10,6 +10,7 @@ const MAX_INPUT = 400;
 const ERRORS: Record<string, string> = {
   not_configured: "The assistant isn't switched on yet.",
   rate_limited: "That's a lot of questions in a short time. Please try again in a few minutes.",
+  busy: "I'm getting a lot of questions right now. Please try again in a few seconds.",
 };
 const FALLBACK_ERROR = "Sorry, I couldn't answer that just now. Please try again in a moment.";
 

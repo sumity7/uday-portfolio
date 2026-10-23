@@ -98,23 +98,36 @@ export async function POST(req: Request) {
   let buffer = '';
 
   const stream = new ReadableStream({
+    // Keep reading until there is text to send. Reasoning models stream many chunks that carry no answer text yet;
+    // returning from pull() without enqueueing would leave the stream waiting forever.
     async pull(controller) {
-      const { done, value } = await reader.read();
-      if (done) return controller.close();
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() ?? '';
-      for (const line of lines) {
-        const t = line.trim();
-        if (!t.startsWith('data:')) continue;
-        const data = t.slice(5).trim();
-        if (data === '[DONE]') return controller.close();
-        try {
-          const delta = JSON.parse(data).choices?.[0]?.delta?.content;
-          if (delta) controller.enqueue(encoder.encode(delta));
-        } catch {
-          /* a partial or keep-alive line; the next chunk completes it */
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) return controller.close();
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split(String.fromCharCode(10));
+        buffer = lines.pop() ?? '';
+        let sent = false;
+        for (const line of lines) {
+          const t = line.trim();
+          if (!t.startsWith('data:')) continue;
+          const data = t.slice(5).trim();
+          if (data === '[DONE]') {
+            controller.close();
+            reader.cancel().catch(() => {});
+            return;
+          }
+          try {
+            const delta = JSON.parse(data).choices?.[0]?.delta?.content;
+            if (delta) {
+              controller.enqueue(encoder.encode(delta));
+              sent = true;
+            }
+          } catch {
+            /* a partial or keep-alive line; the next chunk completes it */
+          }
         }
+        if (sent) return;
       }
     },
     cancel() {
